@@ -622,9 +622,8 @@ const initEditor = () => {
             } else {
                 if (data.error === 'CLAUDE_NOT_FOUND') {
                     // Fallback to Clipboard
-                    const fullPrompt = `Task: ${promptText}\n\nContext HTML:\n${htmlSnippet}`;
-                    const fullPrompt = `Task: ${promptText}\n\nContext HTML:\n${htmlSnippet}`;
-                    
+                    const fullPrompt = `Task: ${promptText}\n\nContext HTML:\n${htmlSnippet}`;            
+        
                     const copyToClipboard = (text) => {
                         if (navigator.clipboard && navigator.clipboard.writeText) {
                              return navigator.clipboard.writeText(text);
