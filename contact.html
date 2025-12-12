@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us | CCCGJ</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
+</head>
+<body>
+
+    <!-- Navigation -->
+    <header>
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+          CCCGJ
+          <span class="logo-subtitle">杰克逊华人基督教会</span>
+        </a>
+            <ul class="nav-links">
+                <li><a href="index.html">Home<span>首页</span></a></li>
+                <li><a href="about.html">About Us<span>关于我们</span></a></li>
+                <li><a href="ministry.html">Ministries<span>事工</span></a></li>
+                <li><a href="resources.html">Resources<span>资源</span></a></li>
+                <li><a href="tithing.html">Giving<span>奉献</span></a></li>
+                <li><a href="contact.html" class="active">Contact Us<span>联系我们</span></a></li>
+            </ul>
+            <div class="hamburger">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+        </div>
+    </header>
+
+    <section class="contact-hero section-padding">
+        <div class="container">
+            <h1 style="font-family: var(--font-heading);">Contact Us</h1>
+            <p>联系我们</p>
+        </div>
+    </section>
+
+    <section class="section-padding">
+        <div class="container">
+            <div class="contact-container">
+                <!-- Left Column: Contact Info -->
+                <div class="contact-info">
+                    <div class="contact-label">联系人 Contacts</div>
+                    <div class="contact-details-text">
+                        <div class="contact-item">
+                            <i class="fas fa-user-tie"></i>
+                            <div>
+                                <p class="contact-name">时尽书牧师 (Pastor Jason Shi)</p>
+                                <p class="contact-name">Pastor Nate Carroll</p>
+                            </div>
+                        </div>
+                        <div class="contact-item">
+                            <i class="fas fa-phone"></i>
+                            <p>769-300-1456</p>
+                        </div>
+                        <div class="contact-item">
+                            <i class="fas fa-envelope"></i>
+                            <p>cccgj2009@gmail.com</p>
+                        </div>
+                    </div>
+
+                    <a href="https://www.facebook.com" target="_blank" class="btn-facebook">
+                        <i class="fab fa-facebook-f"></i> Follow us on Facebook
+                    </a>
+
+                    <div class="contact-details-text" style="margin-top: 40px;">
+                        <div class="contact-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <p>Address 地址 :<br>
+                            803 Old Agency Road, Ridgeland, MS 39157</p>
+                        </div>
+                    </div>
+
+                    <!-- Google Map Embedded -->
+                    <div class="map-container">
+                        <iframe 
+                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3368.6046274797825!2d-90.13468068482594!3d32.40289898080649!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x86283287895478e5%3A0xc6c4c921c172d24!2s803%20Old%20Agency%20Rd%2C%20Ridgeland%2C%20MS%2039157!5e0!3m2!1sen!2sus!4v1678888888888!5m2!1sen!2sus" 
+                            width="100%" 
+                            height="250" 
+                            style="border:0;" 
+                            allowfullscreen="" 
+                            loading="lazy" 
+                            referrerpolicy="no-referrer-when-downgrade">
+                        </iframe>
+                    </div>
+                </div>
+
+                <!-- Right Column: Contact Form -->
+                <div class="contact-form-section">
+                    <form id="contactForm">
+                        <div class="form-group-new">
+                            <label class="form-label-new">Name 姓名</label>
+                            <input type="text" id="name" class="form-control-new" required>
+                        </div>
+                        <div class="form-group-new">
+                            <label class="form-label-new">Email 电子邮件</label>
+                            <input type="email" id="email" class="form-control-new" required>
+                        </div>
+                        <div class="form-group-new">
+                            <label class="form-label-new">Phone 电话</label>
+                            <input type="tel" id="phone" class="form-control-new">
+                        </div>
+                        <div class="form-group-new">
+                            <label class="form-label-new">Message 留言</label>
+                            <textarea id="message" class="form-control-new" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="width: 100%; border: none;">Submit 提交</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- Footer -->
+    <footer>
+      <div class="container">
+        <div class="footer-content">
+          <!-- Left Column -->
+          <div class="footer-col col-left">
+            <h3>CCCGJ 杰克逊华人基督教会</h3>
+            <div class="separator"></div>
+            <p class="slogan-list">
+              Grow In Christ;<br>
+              Serve God's Kingdom;<br>
+              Reach All Nation<br>
+              基督里成长;<br>
+              为神国服侍;<br>
+              向万民宣教。
+            </p>
+          </div>
+
+          <!-- Center Column -->
+          <div class="footer-col col-center">
+            <h3>Giving 奉献</h3>
+            <div class="separator"></div>
+            <p>Please make checks payable to: CCCGJ<br>请将支票抬头写为 CCCGJ</p>
+            <p>邮寄地址Mail Address:<br>803 Old Agency Road, Ridgeland, MS 39157</p>
+            <p>网络奉献 Donation Online through GivingFlow<br>
+            <a href="https://givingflow.rebelgive.com/492ca49234fdd70a6252" target="_blank" class="footer-link">https://givingflow.rebelgive.com/492ca49234fdd70a6252</a></p>
+          </div>
+
+          <!-- Right Column -->
+          <div class="footer-col col-right">
+            <h3>Contacts 联系人</h3>
+            <div class="separator"></div>
+            <p>联系人Contacts:<br>时尽书牧师 (Pastor Jason Shi)<br>Pastor Nate Carroll</p>
+            <p>电话 Phone: 769-300-1456<br>Email: <a href="mailto:cccgj2009@gmail.com" class="footer-link">cccgj2009@gmail.com</a></p>
+          </div>
+        </div>
+        
+        <div class="footer-bottom-bar">
+          <div class="copyright">
+            &copy;CCCGJ, 2025. All Rights Reserved.
+          </div>
+          <div class="address-social">
+            <span>Address 地址: 803 Old Agency Road, Ridgeland, MS 39157</span>
+            <div class="social-icons">
+              <a href="#" class="social-icon"><i class="fab fa-facebook"></i></a>
+              <a href="#" class="social-icon"><i class="fab fa-youtube"></i></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <script src="js/script.js"></script>
+
+    <!-- Modal Response -->
+    <div id="responseModal" class="modal-overlay">
+        <div class="modal-content">
+            <div id="modalIcon" class="modal-icon"></div>
+            <div id="modalTitle" class="modal-title"></div>
+            <div id="modalMessage" class="modal-message"></div>
+            <button class="modal-btn" onclick="closeModal()">Close 关闭</button>
+        </div>
+    </div>
+
+    <script>
+        const modal = document.getElementById('responseModal');
+        const modalIcon = document.getElementById('modalIcon');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalMessage = document.getElementById('modalMessage');
+
+        function showModal(title, message, type) {
+            modalTitle.textContent = title;
+            modalMessage.textContent = message;
+            
+            modalIcon.className = 'modal-icon ' + type;
+            if (type === 'success') {
+                modalIcon.innerHTML = '<i class="fas fa-check-circle"></i>';
+            } else {
+                modalIcon.innerHTML = '<i class="fas fa-exclamation-circle"></i>';
+            }
+            
+            modal.classList.add('active');
+        }
+
+        function closeModal() {
+            modal.classList.remove('active');
+        }
+
+        // Close modal when clicking outside content
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                closeModal();
+            }
+        });
+
+        document.getElementById('contactForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerText;
+            submitBtn.innerText = 'Sending...';
+            submitBtn.disabled = true;
+
+            const data = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                message: document.getElementById('message').value
+            };
+
+            try {
+                const response = await fetch('/api/contact', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showModal('Success 成功', 'Message sent successfully! 留言发送成功！', 'success');
+                    document.getElementById('contactForm').reset();
+                } else {
+                    showModal('Error 错误', 'Error sending message: ' + (result.error || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showModal('Error 错误', 'An error occurred while sending the message.', 'error');
+            } finally {
+                submitBtn.innerText = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

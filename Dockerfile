@@ -1,0 +1,28 @@
+# Use an official Python runtime as a parent image
+FROM python:3.9-slim
+
+# Set the working directory in the container
+WORKDIR /app
+
+# Copy the current directory contents into the container at /app
+COPY . /app
+
+# Install any needed packages specified in requirements.txt
+# (None currently, but good practice to have the step if needed later)
+# RUN pip install --no-cache-dir -r requirements.txt
+
+# Create volume for persistent SQLite database
+VOLUME /app/data
+
+# Make sure the server knows where to look for the DB if we change paths
+# For now, server.py uses local directory, so we just persist the file (contacts.db)
+# We might need to ensure contacts.db is writable. 
+
+# Expose port 8000
+EXPOSE 8000
+
+# Define environment variable if needed
+# ENV NAME World
+
+# Run server.py when the container launches
+CMD ["python", "server.py"]
