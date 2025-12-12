@@ -134,10 +134,30 @@ class AIServerHandler(http.server.SimpleHTTPRequestHandler):
                 return
         
         # Default Static File Serving
+        if self.path.startswith('/api/'):
+             # Handle Preflight
+            if self.command == 'OPTIONS':
+                self.send_response(200)
+                self.end_headers()
+                return
+
+        # Default Static File Serving
         super().do_GET()
 
+    def do_OPTIONS(self):
+        self.send_response(200)
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, DELETE')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+        self.end_headers()
+
     def do_POST(self):
-        if self.path == '/api/contact':
+        # Robust path matching
+        path = self.path.split('?')[0].rstrip('/')
+        
+        print(f"[DEBUG] POST Request to: {self.path} -> Normalized: {path}")
+
+        if path == '/api/contact':
             content_length = int(self.headers['Content-Length'])
             post_data = self.rfile.read(content_length)
             
@@ -164,7 +184,7 @@ class AIServerHandler(http.server.SimpleHTTPRequestHandler):
                 self.end_headers()
                 self.wfile.write(json.dumps({"success": False, "error": str(e)}).encode('utf-8'))
                 
-        elif self.path == '/api/ask-ai':
+        elif path == '/api/ask-ai':
             content_length = int(self.headers['Content-Length'])
             post_data = self.rfile.read(content_length)
             
@@ -175,6 +195,7 @@ class AIServerHandler(http.server.SimpleHTTPRequestHandler):
 
                 # Check if Claude CLI exists
                 if not shutil.which('claude'):
+                    print("[ERROR] 'claude' CLI not found in PATH")
                     self.send_response(200) # Still 200 OK, but with error payload
                     self.send_header('Content-type', 'application/json')
                     self.end_headers()
@@ -210,11 +231,12 @@ class AIServerHandler(http.server.SimpleHTTPRequestHandler):
                 self.wfile.write(json.dumps(response).encode('utf-8'))
                 
             except Exception as e:
+                print(f"[ERROR] AI Processing Exception: {e}")
                 self.send_response(500)
                 self.end_headers()
                 self.wfile.write(json.dumps({"success": False, "error": str(e)}).encode('utf-8'))
         
-        elif self.path == '/api/admin/login':
+        elif path == '/api/admin/login':
             content_length = int(self.headers['Content-Length'])
             post_data = self.rfile.read(content_length)
             try:
@@ -239,6 +261,7 @@ class AIServerHandler(http.server.SimpleHTTPRequestHandler):
                 self.send_error(500, str(e))
 
         else:
+            print(f"[WARNING] 404 For POST Path: {self.path} (Normalized: {path})")
             self.send_error(404, "File not found")
 
     def do_DELETE(self):
