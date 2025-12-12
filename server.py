@@ -1,17 +1,28 @@
 
 import http.server
+import http.cookies
 import socketserver
 import json
 import subprocess
 import os
 import sys
-
+import secrets
 import shutil
 import sqlite3
 import datetime
+import time
 
 PORT = int(os.getenv('PORT', 8000))
 DB_FILE = os.getenv('DB_FILE', 'contacts.db')
+ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD', 'admin123')
+UPLOAD_DIR = os.path.join(os.getcwd(), 'upload')
+
+# Simple in-memory session store: token -> timestamp
+SESSIONS = {}
+SESSION_TIMEOUT = 3600  # 1 hour
+
+if not os.path.exists(UPLOAD_DIR):
+    os.makedirs(UPLOAD_DIR)
 
 def init_db():
     conn = sqlite3.connect(DB_FILE)
@@ -30,6 +41,101 @@ def init_db():
     conn.close()
 
 class AIServerHandler(http.server.SimpleHTTPRequestHandler):
+    def is_authenticated(self):
+        cookie_header = self.headers.get('Cookie')
+        if not cookie_header:
+            return False
+        cookies = http.cookies.SimpleCookie(cookie_header)
+        if 'session_token' not in cookies:
+            return False
+        token = cookies['session_token'].value
+        if token in SESSIONS:
+            # Check expiry
+            if time.time() - SESSIONS[token] < SESSION_TIMEOUT:
+                SESSIONS[token] = time.time()  # Refresh session
+                return True
+            else:
+                del SESSIONS[token]
+        return False
+
+    def do_GET(self):
+        # API Handling
+        if self.path.startswith('/api/'):
+            if self.path == '/api/admin/verify':
+                self.send_response(200 if self.is_authenticated() else 401)
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({"authenticated": self.is_authenticated()}).encode('utf-8'))
+                return
+            
+            # Protected Admin APIs
+            if self.path.startswith('/api/admin/'):
+                if not self.is_authenticated():
+                    self.send_error(401, "Unauthorized")
+                    return
+
+                if self.path == '/api/admin/messages':
+                    try:
+                        conn = sqlite3.connect(DB_FILE)
+                        # Return dicts
+                        conn.row_factory = sqlite3.Row
+                        c = conn.cursor()
+                        c.execute("SELECT * FROM messages ORDER BY timestamp DESC")
+                        rows = c.fetchall()
+                        messages = [dict(row) for row in rows]
+                        conn.close()
+                        
+                        self.send_response(200)
+                        self.send_header('Content-type', 'application/json')
+                        self.end_headers()
+                        self.wfile.write(json.dumps({"success": True, "messages": messages}).encode('utf-8'))
+                    except Exception as e:
+                        self.send_error(500, str(e))
+                    return
+
+                elif self.path == '/api/admin/files':
+                    try:
+                        files = []
+                        if os.path.exists(UPLOAD_DIR):
+                            for f in os.listdir(UPLOAD_DIR):
+                                full_path = os.path.join(UPLOAD_DIR, f)
+                                if os.path.isfile(full_path):
+                                    stats = os.stat(full_path)
+                                    files.append({
+                                        "name": f,
+                                        "size": stats.st_size,
+                                        "modified": stats.st_mtime
+                                    })
+                        self.send_response(200)
+                        self.send_header('Content-type', 'application/json')
+                        self.end_headers()
+                        self.wfile.write(json.dumps({"success": True, "files": files}).encode('utf-8'))
+                    except Exception as e:
+                        self.send_error(500, str(e))
+                    return
+            
+            # Fallthrough for unknown API
+            self.send_error(404, "API endpoint not found")
+            return
+
+        # Secure Admin Frontend Access
+        if self.path.startswith('/admin'):
+             # Allow login page
+            if self.path == '/admin/login.html' or self.path == '/admin/login':
+                 super().do_GET()
+                 return
+            
+            # Protect other admin pages
+            if not self.is_authenticated():
+                # Redirect to login
+                self.send_response(302)
+                self.send_header('Location', '/admin/login.html')
+                self.end_headers()
+                return
+        
+        # Default Static File Serving
+        super().do_GET()
+
     def do_POST(self):
         if self.path == '/api/contact':
             content_length = int(self.headers['Content-Length'])
@@ -107,8 +213,74 @@ class AIServerHandler(http.server.SimpleHTTPRequestHandler):
                 self.send_response(500)
                 self.end_headers()
                 self.wfile.write(json.dumps({"success": False, "error": str(e)}).encode('utf-8'))
+        
+        elif self.path == '/api/admin/login':
+            content_length = int(self.headers['Content-Length'])
+            post_data = self.rfile.read(content_length)
+            try:
+                data = json.loads(post_data)
+                password = data.get('password', '')
+                
+                if password == ADMIN_PASSWORD:
+                    token = secrets.token_hex(16)
+                    SESSIONS[token] = time.time()
+                    
+                    self.send_response(200)
+                    self.send_header('Content-type', 'application/json')
+                    self.send_header('Set-Cookie', f'session_token={token}; Path=/; HttpOnly')
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"success": True}).encode('utf-8'))
+                else:
+                    self.send_response(401)
+                    self.send_header('Content-type', 'application/json')
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"success": False, "error": "Invalid password"}).encode('utf-8'))
+            except Exception as e:
+                self.send_error(500, str(e))
+
         else:
             self.send_error(404, "File not found")
+
+    def do_DELETE(self):
+        if not self.is_authenticated():
+            self.send_error(401, "Unauthorized")
+            return
+
+        if self.path.startswith('/api/admin/messages/'):
+            msg_id = self.path.split('/')[-1]
+            try:
+                conn = sqlite3.connect(DB_FILE)
+                c = conn.cursor()
+                c.execute("DELETE FROM messages WHERE id = ?", (msg_id,))
+                conn.commit()
+                conn.close()
+                
+                self.send_response(200)
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({"success": True}).encode('utf-8'))
+            except Exception as e:
+                self.send_error(500, str(e))
+
+        elif self.path.startswith('/api/admin/files/'):
+            filename = self.path.split('/')[-1]
+            # Security: Prevent directory traversal
+            clean_name = os.path.basename(filename)
+            file_path = os.path.join(UPLOAD_DIR, clean_name)
+            
+            try:
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+                    self.send_response(200)
+                    self.send_header('Content-type', 'application/json')
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"success": True}).encode('utf-8'))
+                else:
+                    self.send_error(404, "File not found")
+            except Exception as e:
+                self.send_error(500, str(e))
+        else:
+            self.send_error(404, "Endpoint not found")
 
     def end_headers(self):
         self.send_header('Access-Control-Allow-Origin', '*')
@@ -119,6 +291,8 @@ if __name__ == "__main__":
     os.chdir(web_dir)
     
     init_db()
+    
+    print(f"Admin Password: {ADMIN_PASSWORD}") # Print for user awareness
     
     with socketserver.TCPServer(("", PORT), AIServerHandler) as httpd:
         print(f"Serving at http://localhost:{PORT}")

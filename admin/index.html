@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Church Ministry</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        header {
+            background: #333;
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+        .logout-btn {
+            color: white;
+            text-decoration: none;
+            border: 1px solid white;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+        }
+        .logout-btn:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        main {
+            flex: 1;
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #ddd;
+            margin-bottom: 2rem;
+        }
+        .tab-btn {
+            padding: 1rem 2rem;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #666;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+        }
+        .tab-btn.active {
+            color: #d10023;
+            border-bottom: 2px solid #d10023;
+        }
+        .tab-content {
+            display: none;
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .tab-content.active {
+            display: block;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            text-align: left;
+            padding: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+        th {
+            background-color: #f8f8f8;
+            font-weight: 600;
+        }
+        .delete-btn {
+            background-color: #ff4d4d;
+            color: white;
+            border: none;
+            padding: 0.5rem 0.8rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        .delete-btn:hover {
+            background-color: #e60000;
+        }
+        .empty-state {
+            text-align: center;
+            color: #999;
+            padding: 2rem;
+        }
+        /* Custom scrollbar for table container if needed */
+        .table-container {
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Admin Dashboard</h1>
+        <a href="#" onclick="logout()" class="logout-btn">Logout</a>
+    </header>
+
+    <main>
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('messages')">Messages</button>
+            <button class="tab-btn" onclick="switchTab('files')">Uploaded Files</button>
+        </div>
+
+        <div id="messages-tab" class="tab-content active">
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Message</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="messages-body">
+                        <!-- Messages will be loaded here -->
+                    </tbody>
+                </table>
+                <div id="messages-empty" class="empty-state" style="display:none">No messages found.</div>
+            </div>
+        </div>
+
+        <div id="files-tab" class="tab-content">
+             <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Filename</th>
+                            <th>Size</th>
+                            <th>Modified</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="files-body">
+                        <!-- Files will be loaded here -->
+                    </tbody>
+                </table>
+                <div id="files-empty" class="empty-state" style="display:none">No uploaded files found.</div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Auth Check
+        async function checkAuth() {
+            try {
+                const res = await fetch('/api/admin/verify');
+                if (res.status === 401 || res.redirected) {
+                    window.location.href = '/admin/login.html';
+                    return;
+                }
+                const data = await res.json();
+                if (!data.authenticated) {
+                    window.location.href = '/admin/login.html';
+                } else {
+                    loadData();
+                }
+            } catch (e) {
+                console.error("Auth check failed", e);
+                window.location.href = '/admin/login.html';
+            }
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            if (tab === 'messages') {
+                document.querySelector('.tab-btn:nth-child(1)').classList.add('active');
+                document.getElementById('messages-tab').classList.add('active');
+            } else {
+                document.querySelector('.tab-btn:nth-child(2)').classList.add('active');
+                document.getElementById('files-tab').classList.add('active');
+            }
+        }
+
+        async function loadData() {
+            loadMessages();
+            loadFiles();
+        }
+
+        async function loadMessages() {
+            const tbody = document.getElementById('messages-body');
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center">Loading...</td></tr>';
+            try {
+                const res = await fetch('/api/admin/messages');
+                const data = await res.json();
+                tbody.innerHTML = '';
+                if (data.success && data.messages.length > 0) {
+                    data.messages.forEach(msg => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${new Date(msg.timestamp).toLocaleString()}</td>
+                            <td>${msg.name || '-'}</td>
+                            <td>${msg.email || '-'}</td>
+                            <td>${msg.phone || '-'}</td>
+                            <td style="max-width:300px; word-break:break-word">${msg.message}</td>
+                            <td><button class="delete-btn" onclick="deleteMessage(${msg.id})">Delete</button></td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                    document.getElementById('messages-empty').style.display = 'none';
+                } else {
+                    document.getElementById('messages-empty').style.display = 'block';
+                }
+            } catch (e) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:red">Error loading messages</td></tr>';
+            }
+        }
+
+        async function deleteMessage(id) {
+            if(!confirm('Are you sure you want to delete this message?')) return;
+            try {
+                const res = await fetch('/api/admin/messages/' + id, { method: 'DELETE' });
+                const data = await res.json();
+                if(data.success) {
+                    loadMessages();
+                } else {
+                    alert('Error deleting message');
+                }
+            } catch(e) {
+                alert('Error deleting message');
+            }
+        }
+
+        async function loadFiles() {
+             const tbody = document.getElementById('files-body');
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center">Loading...</td></tr>';
+            try {
+                const res = await fetch('/api/admin/files');
+                const data = await res.json();
+                tbody.innerHTML = '';
+                if (data.success && data.files.length > 0) {
+                    data.files.forEach(file => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td><a href="/upload/${file.name}" target="_blank">${file.name}</a></td>
+                            <td>${(file.size / 1024).toFixed(2)} KB</td>
+                            <td>${new Date(file.modified * 1000).toLocaleString()}</td>
+                            <td><button class="delete-btn" onclick="deleteFile('${file.name}')">Delete</button></td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                    document.getElementById('files-empty').style.display = 'none';
+                } else {
+                    document.getElementById('files-empty').style.display = 'block';
+                }
+            } catch (e) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:red">Error loading files</td></tr>';
+            }
+        }
+
+        async function deleteFile(name) {
+            if(!confirm('Are you sure you want to delete this file?')) return;
+            try {
+                const res = await fetch('/api/admin/files/' + name, { method: 'DELETE' });
+                const data = await res.json();
+                if(data.success) {
+                    loadFiles();
+                } else {
+                    alert('Error deleting file');
+                }
+            } catch(e) {
+                alert('Error deleting file');
+            }
+        }
+
+        function logout() {
+            // Clear session cookie by setting it to past date
+            document.cookie = "session_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            window.location.href = '/admin/login.html';
+        }
+
+        // Initialize
+        checkAuth();
+    </script>
+</body>
+</html>

@@ -5,6 +5,7 @@ IMAGE_NAME="churchsite"
 CONTAINER_NAME="churchsite_server"
 # PORT=80 (Used default ports 80 and 443)
 DATA_DIR="./church_data"
+ADMIN_PASSWORD="admin123admin456"
 
 echo "Deploying Church Website..."
 
