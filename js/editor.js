@@ -453,15 +453,36 @@ const initEditor = () => {
 
     function enableEditMode() {
         document.body.classList.add('admin-editing-active');
-        const textElements = document.querySelectorAll('h1, h2, h3, h4, h5, p, span, a, li, .card-title, .member-name-cn, .member-name-en');
-        textElements.forEach(el => {
-            if (editorToolbar.contains(el)) return;
-            el.contentEditable = "true";
+        
+        // 1. Explicit text-heavy tags
+        const explicitSelectors = 'h1, h2, h3, h4, h5, p, span, a, li, td, th, button, label, blockquote, pre, code, .card-title, .member-name-cn, .member-name-en';
+        document.querySelectorAll(explicitSelectors).forEach(el => {
+             if (editorToolbar.contains(el) || aiModal.contains(el)) return;
+             el.contentEditable = "true";
         });
+
+        // 2. Divs with direct text content (for "naked" text nodes)
+        document.querySelectorAll('div').forEach(el => {
+            if (editorToolbar.contains(el) || aiModal.contains(el)) return;
+            
+            // Check for non-empty direct text nodes
+            let hasText = false;
+            for (let node of el.childNodes) {
+                if (node.nodeType === 3 && node.textContent.trim().length > 0) { // 3 = TEXT_NODE
+                    hasText = true;
+                    break;
+                }
+            }
+            if (hasText) el.contentEditable = "true";
+        });
+
+        // 3. Images 
         document.querySelectorAll('img').forEach(img => {
             img.addEventListener('click', handleImageClick);
             img.style.cursor = 'pointer';
         });
+
+        // 4. Links (prevent navigation)
         document.querySelectorAll('a').forEach(link => {
             if (!editorToolbar.contains(link)) link.addEventListener('click', preventLinkClick);
         });
