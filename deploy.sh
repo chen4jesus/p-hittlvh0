@@ -34,6 +34,7 @@ docker run -d \
     --name $CONTAINER_NAME \
     -p 80:8000 \
     -v "$(pwd)/$DATA_DIR:/app/data" \
+    -v "$(pwd)/nginx.conf:/etc/nginx/conf.d/default.conf" \
     -e DB_FILE="/app/data/contacts.db" \
     --restart unless-stopped \
     $IMAGE_NAME
@@ -41,3 +42,4 @@ docker run -d \
 echo "Deployment complete!"
 echo "Site is running at http://localhost:80"
 echo "Database is persisted in $(pwd)/$DATA_DIR/contacts.db"
+echo "Nginx config is mounted from $(pwd)/nginx.conf"
