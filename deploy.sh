@@ -3,7 +3,7 @@
 # Configuration
 IMAGE_NAME="churchsite"
 CONTAINER_NAME="churchsite_server"
-PORT=80
+# PORT=80 (Used default ports 80 and 443)
 DATA_DIR="./church_data"
 
 echo "Deploying Church Website..."
@@ -32,12 +32,12 @@ echo "Starting updated container..."
 # --restart: Always restart if it crashes
 docker run -d \
     --name $CONTAINER_NAME \
-    -p $PORT:8000 \
+    -p 80:8000 \
     -v "$(pwd)/$DATA_DIR:/app/data" \
     -e DB_FILE="/app/data/contacts.db" \
     --restart unless-stopped \
     $IMAGE_NAME
 
 echo "Deployment complete!"
-echo "Site is running at http://localhost:$PORT"
+echo "Site is running at http://localhost:80"
 echo "Database is persisted in $(pwd)/$DATA_DIR/contacts.db"

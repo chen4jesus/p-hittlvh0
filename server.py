@@ -10,7 +10,7 @@ import shutil
 import sqlite3
 import datetime
 
-PORT = 8000
+PORT = int(os.getenv('PORT', 8000))
 DB_FILE = os.getenv('DB_FILE', 'contacts.db')
 
 def init_db():

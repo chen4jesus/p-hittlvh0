@@ -18,11 +18,18 @@ VOLUME /app/data
 # For now, server.py uses local directory, so we just persist the file (contacts.db)
 # We might need to ensure contacts.db is writable. 
 
-# Expose port 8000
+# Install Nginx
+RUN apt-get update && apt-get install -y nginx && rm -rf /var/lib/apt/lists/*
+
+# Copy Nginx configuration
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# Copy startup script
+COPY start.sh /start.sh
+RUN chmod +x /start.sh
+
+# Expose ports
 EXPOSE 8000
 
-# Define environment variable if needed
-# ENV NAME World
-
-# Run server.py when the container launches
-CMD ["python", "server.py"]
+# Run startup script
+CMD ["/start.sh"]
