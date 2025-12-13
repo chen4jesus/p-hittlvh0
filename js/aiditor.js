@@ -320,6 +320,7 @@ const initEditor = () => {
     `;
 
     const styleSheet = document.createElement("style");
+    styleSheet.id = "admin-editor-styles";
     styleSheet.innerText = editorStyles;
     document.head.appendChild(styleSheet);
 
@@ -404,6 +405,67 @@ const initEditor = () => {
     `;
     document.body.appendChild(aiModal);
 
+    // 3a. Image Editor Modal
+    const imgModal = document.createElement('div');
+    imgModal.className = 'ai-modal hidden'; // Reuse modal styles
+    imgModal.id = 'image-editor-modal';
+    imgModal.innerHTML = `
+        <div class="ai-modal-content" style="max-width: 400px;">
+            <div class="ai-modal-header">
+                <h3>Edit Image</h3>
+            </div>
+            <div class="ai-modal-body">
+                <div style="margin-bottom: 15px;">
+                    <label style="font-size: 12px; font-weight: bold; display: block; margin-bottom: 5px;">Image Source</label>
+                    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                        <button id="img-tab-url" class="editor-btn active" style="flex:1;">URL</button>
+                        <button id="img-tab-upload" class="editor-btn" style="flex:1;">Upload</button>
+                    </div>
+                    
+                    <div id="img-panel-url">
+                        <input type="text" id="img-url-input" placeholder="https://example.com/image.jpg" 
+                               style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                    </div>
+                    
+                    <div id="img-panel-upload" class="hidden">
+                        <input type="file" id="img-file-input" accept="image/*" 
+                               style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                        <p id="upload-status" style="font-size: 11px; color: #666; margin-top: 5px;"></p>
+                    </div>
+                </div>
+                <div class="ai-modal-actions">
+                    <button id="img-cancel-btn" class="editor-btn">Cancel</button>
+                    <button id="img-save-btn" class="editor-btn btn-save">Apply</button>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(imgModal);
+
+    // 3b. Link Editor Modal
+    const linkModal = document.createElement('div');
+    linkModal.className = 'ai-modal hidden';
+    linkModal.id = 'link-editor-modal';
+    linkModal.innerHTML = `
+        <div class="ai-modal-content" style="max-width: 400px;">
+            <div class="ai-modal-header">
+                <h3>Edit Link</h3>
+            </div>
+            <div class="ai-modal-body">
+                <div style="margin-bottom: 15px;">
+                    <label style="font-size: 12px; font-weight: bold; display: block; margin-bottom: 5px;">Link URL</label>
+                    <input type="text" id="link-url-input" placeholder="https://example.com" 
+                           style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                </div>
+                <div class="ai-modal-actions">
+                    <button id="link-cancel-btn" class="editor-btn">Cancel</button>
+                    <button id="link-save-btn" class="editor-btn btn-save">Apply</button>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(linkModal);
+
     // 3. Toggles
     toggleEditBtn.addEventListener('click', () => {
         if (isAIMode) toggleAIMode(false); // Exclusive modes
@@ -482,9 +544,11 @@ const initEditor = () => {
             img.style.cursor = 'pointer';
         });
 
-        // 4. Links (prevent navigation)
+        // 4. Links (prevent navigation, allow editing)
         document.querySelectorAll('a').forEach(link => {
-            if (!editorToolbar.contains(link)) link.addEventListener('click', preventLinkClick);
+            if (!editorToolbar.contains(link)) {
+                link.addEventListener('click', handleLinkClick);
+            }
         });
     }
 
@@ -496,7 +560,7 @@ const initEditor = () => {
             img.style.cursor = '';
         });
         document.querySelectorAll('a').forEach(link => {
-            link.removeEventListener('click', preventLinkClick);
+            link.removeEventListener('click', handleLinkClick);
         });
     }
 
@@ -708,38 +772,200 @@ const initEditor = () => {
     });
 
     // 7. Helpers
+    let activeImageElement = null;
+
     function handleImageClick(e) {
         e.preventDefault();
-        const currentSrc = e.target.src;
-        const newSrc = prompt("Enter new image URL:", currentSrc);
-        if (newSrc && newSrc !== currentSrc) e.target.src = newSrc;
+        e.stopPropagation();
+        activeImageElement = e.target;
+        
+        const imgModal = document.getElementById('image-editor-modal');
+        const urlInput = document.getElementById('img-url-input');
+        
+        // Reset state
+        urlInput.value = activeImageElement.src;
+        document.getElementById('img-tab-url').click(); // Default to URL
+        document.getElementById('upload-status').textContent = '';
+        document.getElementById('img-file-input').value = '';
+        
+        imgModal.classList.remove('hidden');
     }
-    function preventLinkClick(e) { e.preventDefault(); }
 
-    // 8. Export Logic
+    // Image Modal Logic
+    document.getElementById('img-cancel-btn').addEventListener('click', () => {
+        document.getElementById('image-editor-modal').classList.add('hidden');
+        activeImageElement = null;
+    });
+
+    document.getElementById('img-tab-url').addEventListener('click', (e) => {
+        e.target.classList.add('active');
+        document.getElementById('img-tab-upload').classList.remove('active');
+        document.getElementById('img-panel-url').classList.remove('hidden');
+        document.getElementById('img-panel-upload').classList.add('hidden');
+    });
+
+    document.getElementById('img-tab-upload').addEventListener('click', (e) => {
+        e.target.classList.add('active');
+        document.getElementById('img-tab-url').classList.remove('active');
+        document.getElementById('img-panel-upload').classList.remove('hidden');
+        document.getElementById('img-panel-url').classList.add('hidden');
+    });
+
+    document.getElementById('img-save-btn').addEventListener('click', () => {
+        const isUpload = document.getElementById('img-tab-upload').classList.contains('active');
+        const imgModal = document.getElementById('image-editor-modal');
+        
+        if (isUpload) {
+            const fileInput = document.getElementById('img-file-input');
+            const file = fileInput.files[0];
+            if (!file) {
+                alert("Please select a file first.");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            const statusEl = document.getElementById('upload-status');
+            statusEl.textContent = "Uploading...";
+            
+            fetch('/api/admin/upload', {
+                method: 'POST',
+                body: formData
+                // Note: Do NOT set Content-Type header manually for FormData, browser does it with boundary
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    if (activeImageElement) activeImageElement.src = data.url;
+                    imgModal.classList.add('hidden');
+                } else {
+                    alert("Upload failed: " + (data.error || "Unknown error"));
+                    statusEl.textContent = "Upload failed.";
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert("Upload error: " + err.message);
+                statusEl.textContent = "Error.";
+            });
+
+        } else {
+            const newSrc = document.getElementById('img-url-input').value;
+            if (newSrc && activeImageElement) {
+                activeImageElement.src = newSrc;
+                imgModal.classList.add('hidden');
+            }
+        }
+    });
+
+    // Link Editor Modal Logic
+    let activeLinkElement = null;
+
+    function handleLinkClick(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        activeLinkElement = e.currentTarget; // Use currentTarget for the <a> itself
+        
+        const linkModal = document.getElementById('link-editor-modal');
+        const urlInput = document.getElementById('link-url-input');
+        
+        urlInput.value = activeLinkElement.href;
+        linkModal.classList.remove('hidden');
+    }
+
+    document.getElementById('link-cancel-btn').addEventListener('click', () => {
+        document.getElementById('link-editor-modal').classList.add('hidden');
+        activeLinkElement = null;
+    });
+
+    document.getElementById('link-save-btn').addEventListener('click', () => {
+        const newHref = document.getElementById('link-url-input').value;
+        if (activeLinkElement) {
+            activeLinkElement.href = newHref;
+            document.getElementById('link-editor-modal').classList.add('hidden');
+        }
+    });
+
+    // 8. Export/Publish Logic
+    saveBtn.textContent = "Publish Changes"; // Rename button
     saveBtn.addEventListener('click', () => {
+        if(!confirm("Are you sure you want to overwrite the live page?")) return;
+
         disableEditMode();
         toggleAIMode(false);
         const clone = document.documentElement.cloneNode(true);
-        const elsToRemove = clone.querySelectorAll('#admin-editor-toolbar, .ai-highlighter, .ai-action-btn, .ai-modal');
+        const elsToRemove = clone.querySelectorAll('#admin-editor-toolbar, .ai-highlighter, .ai-action-btn, .ai-modal, #admin-editor-styles, #image-editor-modal, #link-editor-modal');
         elsToRemove.forEach(el => el.remove());
         
-        const styles = clone.querySelectorAll('style');
-        styles.forEach(s => {
-            if (s.innerText.includes('Admin Editor Styles')) s.remove();
+        // Remove injected aiditor.js script to prevent duplication
+        const scripts = clone.querySelectorAll('script');
+        scripts.forEach(s => {
+            if (s.src && s.src.includes('aiditor.js')) s.remove();
         });
 
+        // Clean up empty style and class attributes (e.g. from cleared cursor styles or toggled classes)
+        clone.querySelectorAll('*').forEach(el => {
+            if (el.hasAttribute('style') && el.getAttribute('style').trim() === '') {
+                el.removeAttribute('style');
+            }
+            if (el.classList.length === 0 && el.hasAttribute('class')) {
+                el.removeAttribute('class');
+            }
+        });
+
+        // SANITIZATION: Clear dynamic header/footer to avoid baking in
+        const header = clone.querySelector('#main-header');
+        if(header) header.innerHTML = '';
+        const footer = clone.querySelector('#main-footer');
+        if(footer) footer.innerHTML = '';
+
+        // CLEANUP: Remove contentEditable and active class
+        clone.querySelectorAll('[contenteditable]').forEach(el => el.removeAttribute('contenteditable'));
+        const body = clone.querySelector('body');
+        if(body) body.classList.remove('admin-editing-active');
+
         const htmlContent = "<!DOCTYPE html>\n" + clone.outerHTML;
-        const blob = new Blob([htmlContent], { type: 'text/html' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        let filename = window.location.pathname.split('/').pop() || 'index.html';
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        alert("File ready! Please replace " + filename);
+        const pageName = window.location.pathname.split('/').pop() || 'index.html';
+
+        // Send to Server
+        const originalText = saveBtn.textContent;
+        saveBtn.textContent = "Publishing...";
+        saveBtn.disabled = true;
+
+        fetch('/api/admin/save-page', {
+            method: 'POST',
+            credentials: 'include', // Ensure session cookies are sent
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                page: pageName,
+                content: htmlContent
+            })
+        })
+        .then(res => {
+            if(res.ok) {
+                alert("Success! Page updated.");
+                window.location.reload(); 
+            } else {
+                if (res.status === 401) {
+                    throw new Error("Session expired. Please log in again at /admin/login.html");
+                }
+                return res.text().then(text => {
+                    try {
+                        const d = JSON.parse(text);
+                        throw new Error(d.error || `Server Error (${res.status})`);
+                    } catch(e) {
+                         throw new Error(`Server Error (${res.status})`);
+                    }
+                });
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert("Failed to publish: " + err.message);
+            saveBtn.textContent = originalText;
+            saveBtn.disabled = false;
+        });
     });
 };
 

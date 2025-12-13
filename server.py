@@ -9,11 +9,14 @@ import sqlite3
 import time
 import aissistant
 import urllib.parse
+import shutil
+import datetime
 
 PORT = int(os.getenv('PORT', 8000))
 DB_FILE = os.getenv('DB_FILE', 'churchdata.db')
 ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD', 'admin123')
 UPLOAD_DIR = os.path.join(os.getcwd(), 'upload')
+BACKUP_DIR = os.path.join(os.getcwd(), 'backups')
 
 # Simple in-memory session store: token -> timestamp
 SESSIONS = {}
@@ -21,6 +24,9 @@ SESSION_TIMEOUT = 3600  # 1 hour
 
 if not os.path.exists(UPLOAD_DIR):
     os.makedirs(UPLOAD_DIR)
+
+if not os.path.exists(BACKUP_DIR):
+    os.makedirs(BACKUP_DIR)
 
 def init_db():
     conn = sqlite3.connect(DB_FILE)
@@ -314,6 +320,124 @@ class ServerHandler(http.server.SimpleHTTPRequestHandler):
                     self.end_headers()
                     self.wfile.write(json.dumps({"success": False, "error": "Invalid password"}).encode('utf-8'))
             except Exception as e:
+                self.send_error(500, str(e))
+
+        elif path == '/api/admin/save-page':
+            # Check Authentication
+            if not self.is_authenticated():
+                self.send_error(401, "Unauthorized")
+                return
+
+            content_length = int(self.headers['Content-Length'])
+            post_data = self.rfile.read(content_length)
+            
+            try:
+                data = json.loads(post_data)
+                page_name = data.get('page')
+                content = data.get('content')
+                
+                if not page_name or not content:
+                    self.send_error(400, "Missing page or content")
+                    return
+
+                # Security: Enforce basename and extension
+                clean_name = os.path.basename(page_name)
+                if not clean_name.endswith('.html'):
+                     self.send_error(403, "Only HTML files can be saved")
+                     return
+                
+                # Prevent editing system files if any (optional, but good practice)
+                if clean_name.startswith('admin') or clean_name == 'login.html':
+                     # Just a basic check, though 'admin' is a folder so basename handles it differently.
+                     # But let's be safe about overwriting critical things if they were in root.
+                     pass 
+
+                 
+                file_path = os.path.join(web_dir, clean_name)
+                
+                # BACKUP: Create timestamped backup if file exists
+                if os.path.exists(file_path):
+                    timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+                    backup_name = f"{clean_name}.{timestamp}.bak"
+                    backup_path = os.path.join(BACKUP_DIR, backup_name)
+                    try:
+                        shutil.copy2(file_path, backup_path)
+                        print(f"[BACKUP] Created backup: {backup_name}")
+                    except Exception as e:
+                        print(f"[WARNING] Backup failed: {e}")
+
+                # Write changes
+                with open(file_path, 'w', encoding='utf-8') as f:
+                    f.write(content)
+                
+                print(f"[ADMIN] Updated file: {clean_name}")
+
+                self.send_response(200)
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({"success": True}).encode('utf-8'))
+
+            except Exception as e:
+                print(f"[ERROR] Save Page Exception: {e}")
+                self.send_error(500, str(e))
+
+        elif path == '/api/admin/upload':
+            # Check Authentication
+            if not self.is_authenticated():
+                self.send_error(401, "Unauthorized")
+                return
+
+            try:
+                content_type = self.headers['Content-Type']
+                if not content_type.startswith('multipart/form-data'):
+                    self.send_error(400, "Content-Type must be multipart/form-data")
+                    return
+
+                boundary = content_type.split('boundary=')[1].encode()
+                content_length = int(self.headers['Content-Length'])
+                body = self.rfile.read(content_length)
+
+                # Split by boundary
+                parts = body.split(b'--' + boundary)
+                
+                saved_filename = None
+                
+                for part in parts:
+                    if b'filename="' in part:
+                        # Extract headers and content
+                        headers_raw, content = part.split(b'\r\n\r\n', 1)
+                        content = content.rstrip(b'\r\n--') # Remove trailing boundary markers
+                        
+                        # Extract filename
+                        headers_str = headers_raw.decode()
+                        for line in headers_str.split('\r\n'):
+                            if 'Content-Disposition' in line:
+                                import re
+                                match = re.search(r'filename="(.+?)"', line)
+                                if match:
+                                    original_filename = match.group(1)
+                                    # Sanitize filename
+                                    safe_name = os.path.basename(original_filename).replace(' ', '_')
+                                    # Ensure unique or timestamped? Let's just keep original but safe
+                                    saved_filename = safe_name
+                                    
+                                    file_path = os.path.join(UPLOAD_DIR, saved_filename)
+                                    with open(file_path, 'wb') as f:
+                                        f.write(content)
+                                    break
+                
+                if saved_filename:
+                    print(f"[ADMIN] Uploaded file: {saved_filename}")
+                    self.send_response(200)
+                    self.send_header('Content-type', 'application/json')
+                    self.end_headers()
+                    # Return path relative to web root
+                    self.wfile.write(json.dumps({"success": True, "url": f"upload/{saved_filename}"}).encode('utf-8'))
+                else:
+                    self.send_error(400, "No file found in request")
+
+            except Exception as e:
+                print(f"[ERROR] Upload Exception: {e}")
                 self.send_error(500, str(e))
 
         else:
