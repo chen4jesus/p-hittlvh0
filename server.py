@@ -8,6 +8,7 @@ import secrets
 import sqlite3
 import time
 import aissistant
+import urllib.parse
 
 PORT = int(os.getenv('PORT', 8000))
 DB_FILE = os.getenv('DB_FILE', 'churchdata.db')
@@ -117,9 +118,26 @@ class ServerHandler(http.server.SimpleHTTPRequestHandler):
                         self.send_error(500, str(e))
                     return
 
-                if self.path.startswith('/api/admin/files'):
-                     # ... (Existing files logic, not shown to save space, but assuming context is correct) ...
-                     pass 
+                if self.path == '/api/admin/files':
+                    try:
+                        files = []
+                        if os.path.exists(UPLOAD_DIR):
+                            for f in os.listdir(UPLOAD_DIR):
+                                full_path = os.path.join(UPLOAD_DIR, f)
+                                if os.path.isfile(full_path):
+                                    stats = os.stat(full_path)
+                                    files.append({
+                                        "name": f,
+                                        "size": stats.st_size,
+                                        "modified": stats.st_mtime
+                                    })
+                        self.send_response(200)
+                        self.send_header('Content-type', 'application/json')
+                        self.end_headers()
+                        self.wfile.write(json.dumps({"success": True, "files": files}).encode('utf-8'))
+                    except Exception as e:
+                        self.send_error(500, str(e))
+                    return
 
                 # AI History APIs
                 if self.path.startswith('/api/ai/history'):
@@ -325,6 +343,9 @@ class ServerHandler(http.server.SimpleHTTPRequestHandler):
 
         elif self.path.startswith('/api/admin/files/'):
             filename = self.path.split('/')[-1]
+            # Decode URL-encoded filename (e.g. %20 -> space, %E7... -> Chinese chars)
+            filename = urllib.parse.unquote(filename)
+            
             # Security: Prevent directory traversal
             clean_name = os.path.basename(filename)
             file_path = os.path.join(UPLOAD_DIR, clean_name)
@@ -340,8 +361,7 @@ class ServerHandler(http.server.SimpleHTTPRequestHandler):
                     self.send_error(404, "File not found")
             except Exception as e:
                 self.send_error(500, str(e))
-        else:
-            self.send_error(404, "Endpoint not found")
+            return
 
     def end_headers(self):
         self.send_header('Access-Control-Allow-Origin', '*')
