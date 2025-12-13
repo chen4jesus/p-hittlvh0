@@ -22,10 +22,10 @@ VOLUME /app/data
 RUN apt-get update && apt-get install -y nginx && rm -rf /var/lib/apt/lists/*
 
 # Copy Nginx configuration
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
 
 # Copy startup script
-COPY start.sh /start.sh
+COPY docker/start.sh /start.sh
 RUN chmod +x /start.sh
 
 # Expose ports

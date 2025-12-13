@@ -19,7 +19,7 @@ fi
 
 # 2. Build the Docker image
 echo "Building Docker image..."
-docker build -t $IMAGE_NAME .
+docker build -f docker/Dockerfile -t $IMAGE_NAME .
 
 # 3. Create data directory for persistence
 mkdir -p $DATA_DIR
@@ -35,7 +35,7 @@ docker run -d \
     --name $CONTAINER_NAME \
     -p 80:8000 \
     -v "$(pwd)/$DATA_DIR:/app/data" \
-    -v "$(pwd)/nginx.conf:/etc/nginx/conf.d/default.conf" \
+    -v "$(pwd)/docker/nginx.conf:/etc/nginx/conf.d/default.conf" \
     -e DB_FILE="/app/data/contacts.db" \
     -e ADMIN_PASSWORD="${ADMIN_PASSWORD}" \
     --restart unless-stopped \
