@@ -28,10 +28,20 @@
             margin: 0;
             font-size: 1.5rem;
         }
-        .logout-btn {
+        .home-btn {
             color: white;
             text-decoration: none;
             border: 1px solid white;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+        }
+        .home-btn:hover {
+            background: rgba(255, 255, 255, 0.699);
+        }
+        .logout-btn {
+            color: white;
+            text-decoration: none;
+            border: 1px solid rgb(250, 149, 149);
             padding: 0.5rem 1rem;
             border-radius: 4px;
         }
@@ -226,7 +236,8 @@
 
     <header>
         <h1>Admin Dashboard</h1>
-        <a href="#" onclick="logout()" class="logout-btn">Logout</a>
+        <a href="/index.html" class="home-btn"><i class="fas fa-home"></i> Back to Home Page</a>
+        <a href="#" onclick="logout()" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
     </header>
 
     <main>
