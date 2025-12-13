@@ -4,13 +4,81 @@ import base64
 import time
 import shutil
 import subprocess
+import sqlite3
 
-def handle_ai_request(data, captures_dir):
+def init_db(db_path):
+    conn = sqlite3.connect(db_path)
+    c = conn.cursor()
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS prompt_history (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            prompt TEXT,
+            context TEXT,
+            image_path TEXT,
+            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+            git_hash_before TEXT,
+            git_hash_after TEXT
+        )
+    ''')
+    conn.commit()
+    conn.close()
+
+def get_git_hash():
+    try:
+        # Get short hash
+        return subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).strip().decode('utf-8')
+    except Exception:
+        return "unknown"
+
+def log_prompt(db_path, prompt, context, image_path):
+    try:
+        git_hash = get_git_hash()
+        conn = sqlite3.connect(db_path)
+        c = conn.cursor()
+        c.execute("INSERT INTO prompt_history (prompt, context, image_path, git_hash_before) VALUES (?, ?, ?, ?)",
+                  (prompt, context, image_path, git_hash))
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        print(f"[ERROR] Failed to log prompt: {e}")
+
+def get_history(db_path, limit=20, offset=0):
+    try:
+        conn = sqlite3.connect(db_path)
+        conn.row_factory = sqlite3.Row
+        c = conn.cursor()
+        c.execute("SELECT * FROM prompt_history ORDER BY timestamp DESC LIMIT ? OFFSET ?", (limit, offset))
+        rows = c.fetchall()
+        history = [dict(row) for row in rows]
+        
+        c.execute("SELECT COUNT(*) FROM prompt_history")
+        total = c.fetchone()[0]
+        
+        conn.close()
+        return {"history": history, "total": total}
+    except Exception as e:
+        print(f"[ERROR] Failed to get history: {e}")
+        return {"history": [], "total": 0}
+
+def update_history_commit(db_path, history_id, commit_hash):
+    try:
+        conn = sqlite3.connect(db_path)
+        c = conn.cursor()
+        c.execute("UPDATE prompt_history SET git_hash_after = ? WHERE id = ?", (commit_hash, history_id))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        print(f"[ERROR] Failed to update history commit: {e}")
+        return False
+
+def handle_ai_request(data, captures_dir, db_path):
     """
     Handles the AI request:
     1. Decodes and saves the image (if any).
-    2. Constructs the prompt.
-    3. Calls the Claude CLI.
+    2. Logs the request to DB.
+    3. Constructs the prompt.
+    4. Calls the Claude CLI.
     """
     prompt = data.get('prompt', '')
     context = data.get('context', '')
@@ -18,6 +86,7 @@ def handle_ai_request(data, captures_dir):
 
     # Handle Image Capture
     image_path_msg = ""
+    saved_image_path = None
     if image_data:
         try:
             # Remove header if present (e.g., "data:image/png;base64,...")
@@ -32,9 +101,14 @@ def handle_ai_request(data, captures_dir):
                 f.write(img_bytes)
             
             image_path_msg = f"\n\n[System: A screenshot of the element has been saved to: {filepath} ]"
+            saved_image_path = filepath
             print(f"[AI Agent] Saved screenshot to: {filepath}")
         except Exception as img_err:
             print(f"[ERROR] Failed to save screenshot: {img_err}")
+
+    # Log to Database
+    if db_path:
+        log_prompt(db_path, prompt, context, saved_image_path)
 
     # Check if Claude CLI exists
     if not shutil.which('claude'):

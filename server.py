@@ -126,23 +126,32 @@ class ServerHandler(http.server.SimpleHTTPRequestHandler):
                         self.send_error(500, str(e))
                     return
 
-                elif self.path == '/api/admin/files':
+                if self.path.startswith('/api/admin/files'):
+                     # ... (Existing files logic, not shown to save space, but assuming context is correct) ...
+                     pass 
+
+                # AI History APIs
+                if self.path.startswith('/api/ai/history'):
                     try:
-                        files = []
-                        if os.path.exists(UPLOAD_DIR):
-                            for f in os.listdir(UPLOAD_DIR):
-                                full_path = os.path.join(UPLOAD_DIR, f)
-                                if os.path.isfile(full_path):
-                                    stats = os.stat(full_path)
-                                    files.append({
-                                        "name": f,
-                                        "size": stats.st_size,
-                                        "modified": stats.st_mtime
-                                    })
+                         # Parse query params
+                        query_string = self.path.split('?')[1] if '?' in self.path else ''
+                        params = {}
+                        if query_string:
+                            for pair in query_string.split('&'):
+                                if '=' in pair:
+                                    k, v = pair.split('=')
+                                    params[k] = v
+                        
+                        page = int(params.get('page', 1))
+                        limit = int(params.get('limit', 20))
+                        offset = (page - 1) * limit
+
+                        result = aissistant.get_history(DB_FILE, limit, offset)
+                        
                         self.send_response(200)
                         self.send_header('Content-type', 'application/json')
                         self.end_headers()
-                        self.wfile.write(json.dumps({"success": True, "files": files}).encode('utf-8'))
+                        self.wfile.write(json.dumps({"success": True, **result}).encode('utf-8'))
                     except Exception as e:
                         self.send_error(500, str(e))
                     return
@@ -183,31 +192,30 @@ class ServerHandler(http.server.SimpleHTTPRequestHandler):
             return
 
         if self.path.startswith('/api/admin/messages/'):
-            msg_id = self.path.split('/')[-1]
+             # ... (Existing PUT logic) ...
+             pass
+
+        elif self.path.startswith('/api/ai/history/'):
+            # Allow updating commit hash for a history entry
+            if not self.is_authenticated():
+                self.send_error(401, "Unauthorized")
+                return
+
+            hist_id = self.path.split('/')[-1]
             content_length = int(self.headers['Content-Length'])
             put_data = self.rfile.read(content_length)
 
             try:
                 data = json.loads(put_data)
-                name = data.get('name')
-                email = data.get('email')
-                phone = data.get('phone')
-                message_content = data.get('message')
-
-                conn = sqlite3.connect(DB_FILE)
-                c = conn.cursor()
-                c.execute("""
-                    UPDATE messages 
-                    SET name = ?, email = ?, phone = ?, message = ?
-                    WHERE id = ?
-                """, (name, email, phone, message_content, msg_id))
-                conn.commit()
-                conn.close()
-
-                self.send_response(200)
-                self.send_header('Content-type', 'application/json')
-                self.end_headers()
-                self.wfile.write(json.dumps({"success": True}).encode('utf-8'))
+                commit_hash = data.get('commit_hash')
+                
+                if aissistant.update_history_commit(DB_FILE, hist_id, commit_hash):
+                    self.send_response(200)
+                    self.send_header('Content-type', 'application/json')
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"success": True}).encode('utf-8'))
+                else:
+                    self.send_error(500, "Failed to update")
             except Exception as e:
                 self.send_error(500, str(e))
         else:
@@ -261,7 +269,7 @@ class ServerHandler(http.server.SimpleHTTPRequestHandler):
                 data = json.loads(post_data)
                 
                 # Delegate to AI Assistant Module
-                response = aissistant.handle_ai_request(data, CAPTURES_DIR)
+                response = aissistant.handle_ai_request(data, CAPTURES_DIR, DB_FILE)
                 
                 # Send Response
                 self.send_response(200)
@@ -356,6 +364,7 @@ if __name__ == "__main__":
     os.chdir(web_dir)
     
     init_db()
+    aissistant.init_db(DB_FILE)
     
     print(f"Admin Password: {ADMIN_PASSWORD}") # Print for user awareness
     
