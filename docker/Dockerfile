@@ -7,9 +7,8 @@ WORKDIR /app
 # Copy the current directory contents into the container at /app
 COPY . /app
 
-# Install any needed packages specified in requirements.txt
-# (None currently, but good practice to have the step if needed later)
-# RUN pip install --no-cache-dir -r requirements.txt
+# Install Python dependencies
+RUN pip install --no-cache-dir flask anthracite-cli
 
 # Create volume for persistent SQLite database
 VOLUME /app/data
