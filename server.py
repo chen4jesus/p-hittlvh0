@@ -11,6 +11,7 @@ import aissistant
 import urllib.parse
 import shutil
 import datetime
+import random
 
 PORT = int(os.getenv('PORT', 8000))
 DB_FILE = os.getenv('DB_FILE', 'churchdata.db')
@@ -21,6 +22,10 @@ BACKUP_DIR = os.path.join(os.getcwd(), 'backups')
 # Simple in-memory session store: token -> timestamp
 SESSIONS = {}
 SESSION_TIMEOUT = 3600  # 1 hour
+
+# Captcha Store: token -> {answer, timestamp}
+CAPTCHA_SESSIONS = {}
+CAPTCHA_TIMEOUT = 600 # 10 minutes
 
 if not os.path.exists(UPLOAD_DIR):
     os.makedirs(UPLOAD_DIR)
@@ -171,6 +176,41 @@ class ServerHandler(http.server.SimpleHTTPRequestHandler):
                         self.send_error(500, str(e))
                     return
             
+                    return
+            
+            # Public API: Get Captcha
+            if self.path == '/api/captcha':
+                try:
+                    # Generate Random Math Problem
+                    n1 = random.randint(1, 10)
+                    n2 = random.randint(1, 10)
+                    answer = str(n1 + n2)
+                    token = secrets.token_hex(16)
+                    
+                    # Store in memory
+                    CAPTCHA_SESSIONS[token] = {
+                        "answer": answer,
+                        "timestamp": time.time()
+                    }
+                    
+                    # Cleanup old captchas (simple logic: random cleaning chance)
+                    if random.randint(0, 10) == 0:
+                         keys_to_del = [k for k, v in CAPTCHA_SESSIONS.items() if time.time() - v['timestamp'] > CAPTCHA_TIMEOUT]
+                         for k in keys_to_del:
+                             del CAPTCHA_SESSIONS[k]
+
+                    self.send_response(200)
+                    self.send_header('Content-type', 'application/json')
+                    self.end_headers()
+                    self.wfile.write(json.dumps({
+                        "success": True, 
+                        "token": token,
+                        "question": f"{n1} + {n2} = ?"
+                    }).encode('utf-8'))
+                except Exception as e:
+                    self.send_error(500, str(e))
+                return
+
             # Fallthrough for unknown API
             self.send_error(404, "API endpoint not found")
             return
@@ -259,6 +299,37 @@ class ServerHandler(http.server.SimpleHTTPRequestHandler):
                 email = data.get('email', '')
                 phone = data.get('phone', '')
                 message = data.get('message', '')
+                
+                # --- Bot Prevention ---
+                honeypot = data.get('website', '')
+                math_ans = data.get('math_challenge', '')
+                captcha_token = data.get('captcha_token', '')
+
+                # 1. Honeypot Check
+                if honeypot:
+                    print(f"[BOT DETECTED] Honeypot filled: {honeypot}")
+                    raise Exception("Spam detected (honeypot)")
+                
+                # 2. Dynamic Math Challenge
+                if not captcha_token or captcha_token not in CAPTCHA_SESSIONS:
+                     # Allow fallback to hardcoded 12 ONLY if no token provided (backward compt) or strictly enforce
+                     # Let's strictly enforce for now since frontend will be updated
+                     print(f"[BOT DETECTED] Invalid/Missing Captcha Token")
+                     raise Exception("Invalid or expired captcha. Please refresh and try again.")
+                
+                stored_data = CAPTCHA_SESSIONS[captcha_token]
+                # Check expiration again to be safe
+                if time.time() - stored_data['timestamp'] > CAPTCHA_TIMEOUT:
+                    del CAPTCHA_SESSIONS[captcha_token]
+                    raise Exception("Captcha expired. Please refresh page.")
+
+                if str(math_ans).strip() != stored_data['answer']:
+                     print(f"[BOT DETECTED] Math failed: {math_ans} != {stored_data['answer']}")
+                     raise Exception("Incorrect math answer.")
+                
+                # Consumption: Delete used token
+                del CAPTCHA_SESSIONS[captcha_token]
+                # -----------------------
 
                 conn = sqlite3.connect(DB_FILE)
                 c = conn.cursor()
