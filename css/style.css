@@ -1124,3 +1124,38 @@ textarea.form-control-new {
   opacity: 1;
   gap: 12px;
 }
+
+/* --- Back to Top Button --- */
+#back-to-top-btn {
+    display: none; /* Hidden by default */
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    z-index: 9999;
+    font-size: 20px;
+    border: none;
+    outline: none;
+    background-color: var(--primary-color);
+    color: white;
+    cursor: pointer;
+    padding: 12px 16px;
+    border-radius: 50%;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    transition: all 0.3s ease;
+    opacity: 0.6;
+}
+
+#back-to-top-btn:hover {
+    background-color: var(--primary-color);
+    transform: translateY(-3px);
+    opacity: 1;
+}
+
+@media (max-width: 768px) {
+    #back-to-top-btn {
+        bottom: 20px;
+        right: 20px;
+        padding: 10px 14px;
+        font-size: 18px;
+    }
+}

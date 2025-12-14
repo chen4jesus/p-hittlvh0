@@ -63,7 +63,39 @@ document.addEventListener("DOMContentLoaded", () => {
       })
       .catch(err => console.error("Error loading footer:", err));
   }
+  
+  // Initialize Back to Top Button
+  initBackToTop();
 });
+
+// Back to Top Button Logic
+function initBackToTop() {
+    // 1. Create Button
+    const btn = document.createElement("button");
+    btn.id = "back-to-top-btn";
+    btn.innerHTML = "<i class=\"fa-solid fa-angle-up\"></i>"; // Top Arrow
+    btn.title = "Go to top";
+    btn.setAttribute("aria-label", "Back to top");
+    document.body.appendChild(btn);
+
+    // 2. Show/Hide on Scroll
+    window.addEventListener("scroll", () => {
+        // Show if scrolled more than window height (mobile "first screen")
+        if (document.body.scrollTop > window.innerHeight || document.documentElement.scrollTop > window.innerHeight/2) {
+            btn.style.display = "block";
+        } else {
+            btn.style.display = "none";
+        }
+    });
+
+    // 3. Scroll to Top on Click
+    btn.addEventListener("click", () => {
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+    });
+}
 
 // AI Editor Mode Logic
 (function() {
