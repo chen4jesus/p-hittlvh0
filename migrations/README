@@ -1,0 +1,15 @@
+Database Migrations
+
+This directory contains Flask-Migrate/Alembic migration scripts.
+
+To initialize migrations:
+    flask db init
+
+To create a new migration:
+    flask db migrate -m "description"
+
+To apply migrations:
+    flask db upgrade
+
+To rollback:
+    flask db downgrade
