@@ -47,7 +47,7 @@
             
             <div class="carousel-container" style="margin-bottom: 40px;">
                 <div class="carousel-wrapper">
-                    <div class="carousel-track" style="transform: translateX(-66.6667%);">
+                    <div class="carousel-track" style="transform: translateX(0%);">
                         <!-- Item 1 -->
                         <div class="carousel-item" style="flex: 0 0 33.3333%;">
                             <div class="card">
@@ -82,7 +82,7 @@
                         <div class="carousel-item" style="flex: 0 0 33.3333%;">
                             <div class="card">
                                 <div class="card-body">
-                                    <h3 class="card-title">Christ Alone</h3>
+                                    <h3 class="card-title">Christ Alone1</h3>
                                     <p>Date: November 23, 2025</p>
                                     <p>Speaker: Pastor Nate</p>
                                     <br>
@@ -97,7 +97,7 @@
                         <div class="carousel-item" style="flex: 0 0 33.3333%;">
                             <div class="card">
                                 <div class="card-body">
-                                    <h3 class="card-title">Soli Deo Gloria</h3>
+                                    <h3 class="card-title">祷告的力量 The Power of Prayer</h3>
                                     <p>Date: November 16, 2025</p>
                                     <p>Speaker: 时牧师</p>
                                     <br>
@@ -114,7 +114,7 @@
                                 <div class="card-body">
                                     <h3 class="card-title">信仰与生活 Faith and Life</h3>
                                     <p>Date: November 9, 2025</p>
-                                    <p>Speaker: Pastor Nate</p>
+                                    <p>Speaker: Pastor Michael Liu</p>
                                     <br>
                                     <a href="#" target="_blank" class="btn btn-secondary youtube-btn">
                                         <i class="fab fa-youtube"></i> Watch on YouTube
@@ -247,4 +247,4 @@
 
 <button id="back-to-top-btn" title="Go to top" aria-label="Back to top"><i class="fa-solid fa-angle-up"></i></button>
 
-<button id="back-to-top-btn" title="Go to top" aria-label="Back to top"><i class="fa-solid fa-angle-up"></i></button><button id="back-to-top-btn" title="Go to top" aria-label="Back to top"><i class="fa-solid fa-angle-up"></i></button></body></html>
+</body></html>
