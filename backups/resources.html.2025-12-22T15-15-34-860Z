@@ -10,7 +10,7 @@
 </head>
 <body style="cursor: crosshair;">
 
-    <!-- Navigation -->
+    <!-- Navigation -->uyiyi
     <header id="main-header">
         <div class="nav-container">
             <a href="/" class="logo">
@@ -47,7 +47,7 @@
             
             <div class="carousel-container" style="margin-bottom: 40px;">
                 <div class="carousel-wrapper">
-                    <div class="carousel-track" style="transform: translateX(0%);">
+                    <div class="carousel-track" style="transform: translateX(-33.3333%);">
                         <!-- Item 1 -->
                         <div class="carousel-item" style="flex: 0 0 33.3333%;">
                             <div class="card">
@@ -82,9 +82,9 @@
                         <div class="carousel-item" style="flex: 0 0 33.3333%;">
                             <div class="card">
                                 <div class="card-body">
-                                    <h3 class="card-title">基督的中心性 The Centrality of Christ</h3>
+                                    <h3 class="card-title">Christ Alone</h3>
                                     <p>Date: November 23, 2025</p>
-                                    <p>Speaker: Pastor David Chen</p>
+                                    <p>Speaker: Pastor Nate</p>
                                     <br>
                                     <a href="#" target="_blank" class="btn btn-secondary youtube-btn">
                                         <i class="fab fa-youtube"></i> Watch on YouTube
@@ -245,6 +245,7 @@
 
     <script src="/static/js/script.js"></script>
 
+<button id="back-to-top-btn" title="Go to top" aria-label="Back to top"><i class="fa-solid fa-angle-up"></i></button>
 <button id="back-to-top-btn" title="Go to top" aria-label="Back to top"><i class="fa-solid fa-angle-up"></i></button>
 <button id="back-to-top-btn" title="Go to top" aria-label="Back to top"><i class="fa-solid fa-angle-up"></i></button>
 </body></html>

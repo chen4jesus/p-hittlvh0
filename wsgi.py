@@ -12,7 +12,7 @@ try:
         print(f"Starting Flask server on port {port}...", flush=True)
         # Bind specifically to 127.0.0.1 to match preview manager expectation on Windows
         # Disable reloader to prevent forking issues
-        app.run(host='127.0.0.1', port=port, debug=True, use_reloader=False)
+        app.run(host='0.0.0.0', port=int(os.environ.get('PORT', port)), debug=True, use_reloader=False)
 
 except Exception as e:
     import traceback

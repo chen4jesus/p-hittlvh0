@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - FLASK_APP=wsgi.py
+      - FLASK_DEBUG=false
+      - SECRET_KEY=${SECRET_KEY:-production-secret-key}
+      - DATABASE_URL=${DATABASE_URL:-sqlite:///instance/app.db}
+    volumes:
+      - ./instance:/app/instance
+    restart: unless-stopped
