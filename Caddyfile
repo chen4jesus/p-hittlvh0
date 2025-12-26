@@ -1,0 +1,17 @@
+{
+    # Global options
+    email {$ACME_EMAIL:admin@example.com}
+}
+
+{$DOMAIN_NAME:localhost} {
+    # Reverse proxy to the web service container on port 8000
+    reverse_proxy web:8000
+
+    # Optional: Log settings
+    log {
+        output file /var/log/caddy/access.log
+    }
+
+    # Compress responses
+    encode zstd gzip
+}

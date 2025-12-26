@@ -13,4 +13,4 @@ COPY . .
 EXPOSE 8000
 
 # Run with gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:3000", "wsgi:app"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "wsgi:app"]

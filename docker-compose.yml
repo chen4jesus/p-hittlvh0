@@ -3,8 +3,8 @@ version: '3.8'
 services:
   web:
     build: .
-    ports:
-      - "8000:8000"
+    expose:
+      - "8000"
     environment:
       - FLASK_APP=wsgi.py
       - FLASK_DEBUG=false
@@ -13,3 +13,21 @@ services:
     volumes:
       - ./instance:/app/instance
     restart: unless-stopped
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - DOMAIN_NAME=${DOMAIN_NAME:-localhost}
+      - ACME_EMAIL=${ACME_EMAIL:-admin@example.com}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+
+volumes:
+  caddy_data:
+  caddy_config:
