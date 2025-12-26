@@ -6,11 +6,18 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy application
+# Copy Caddy from official image
+COPY --from=caddy:2-alpine /usr/bin/caddy /usr/bin/caddy
+
+# Copy application and config
 COPY . .
+COPY Caddyfile /etc/caddy/Caddyfile
 
-# Expose port
-EXPOSE 8000
+# Prepare startup script
+RUN chmod +x start.sh
 
-# Run with gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "wsgi:app"]
+# Expose ports
+EXPOSE 80 443 8000
+
+# Start both services
+CMD ["./start.sh"]

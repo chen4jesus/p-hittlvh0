@@ -4,8 +4,8 @@
 }
 
 {$DOMAIN_NAME:localhost} {
-    # Reverse proxy to the web service container on port 8000
-    reverse_proxy web:8000
+    # Reverse proxy to the local Gunicorn server on port 8000
+    reverse_proxy localhost:8000
 
     # Optional: Log settings
     log {

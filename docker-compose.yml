@@ -3,30 +3,22 @@ version: '3.8'
 services:
   web:
     build: .
-    expose:
-      - "8000"
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8000:8000"
     environment:
       - FLASK_APP=wsgi.py
       - FLASK_DEBUG=false
       - SECRET_KEY=${SECRET_KEY:-production-secret-key}
       - DATABASE_URL=${DATABASE_URL:-sqlite:///instance/app.db}
-    volumes:
-      - ./instance:/app/instance
-    restart: unless-stopped
-
-  caddy:
-    image: caddy:2-alpine
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
-    environment:
       - DOMAIN_NAME=${DOMAIN_NAME:-localhost}
       - ACME_EMAIL=${ACME_EMAIL:-admin@example.com}
     volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile
+      - ./instance:/app/instance
       - caddy_data:/data
       - caddy_config:/config
+    restart: unless-stopped
 
 volumes:
   caddy_data:
