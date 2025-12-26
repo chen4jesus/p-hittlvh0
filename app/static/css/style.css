@@ -318,8 +318,8 @@ header {
 /* Hero Section */
 .hero {
   background:
-    linear-gradient(rgba(0, 51, 102, 0.8), rgba(0, 51, 102, 0.6)),
-    url("../images/church.jpg");
+    linear-gradient(rgba(0, 51, 102, 0.7), rgba(0, 51, 102, 0.5)),
+    url("https://images.unsplash.com/photo-1438232992991-995b7058bbb3?w=1920&q=80");
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
