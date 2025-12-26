@@ -3,61 +3,61 @@
 {% block title %}Contact Us{% endblock %}
 
 {% block content %}
-    <section class="contact-hero section-padding" data-ai-src-id="app/templates/pages/contact.html::0">
-        <div class="container" data-ai-src-id="app/templates/pages/contact.html::1">
-            <h1 style="font-family: var(--font-heading);" data-ai-src-id="app/templates/pages/contact.html::2">Contact Us</h1>
-            <p data-ai-src-id="app/templates/pages/contact.html::3">联系我们</p>
+    <section class="contact-hero section-padding">
+        <div class="container">
+            <h1 style="font-family: var(--font-heading);">Contact Us</h1>
+            <p>联系我们</p>
         </div>
     </section>
 
-    <section class="section-padding" data-ai-src-id="app/templates/pages/contact.html::4">
-        <div class="container" data-ai-src-id="app/templates/pages/contact.html::5">
+    <section class="section-padding">
+        <div class="container">
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
                     {% for category, message in messages %}
-                        <div class="alert alert-{{ category }}" style="padding: 1rem; margin-bottom: 2rem; border-radius: 8px; background: {% if category == 'success' %}#dcfce7; color: #166534{% else %}#fee2e2; color: #991b1b{% endif %};" data-ai-src-id="app/templates/pages/contact.html::6">
+                        <div class="alert alert-{{ category }}" style="padding: 1rem; margin-bottom: 2rem; border-radius: 8px; background: {% if category == 'success' %}#dcfce7; color: #166534{% else %}#fee2e2; color: #991b1b{% endif %};">
                             {{ message }}
                         </div>
                     {% endfor %}
                 {% endif %}
             {% endwith %}
 
-            <div class="contact-container" data-ai-src-id="app/templates/pages/contact.html::7">
+            <div class="contact-container">
                 <!-- Left Column: Contact Info -->
-                <div class="contact-info" data-ai-src-id="app/templates/pages/contact.html::8">
-                    <div class="contact-label" data-ai-src-id="app/templates/pages/contact.html::9">联系人 Contacts</div>
-                    <div class="contact-details-text" data-ai-src-id="app/templates/pages/contact.html::10">
-                        <div class="contact-item" data-ai-src-id="app/templates/pages/contact.html::11">
-                            <i class="fas fa-user-tie" data-ai-src-id="app/templates/pages/contact.html::12"></i>
-                            <div data-ai-src-id="app/templates/pages/contact.html::13">
-                                <p class="contact-name" data-ai-src-id="app/templates/pages/contact.html::14">时尽书牧师 (Pastor Jason Shi)</p>
-                                <p class="contact-name" data-ai-src-id="app/templates/pages/contact.html::15">Pastor Nate Carroll</p>
+                <div class="contact-info">
+                    <div class="contact-label">联系人 Contacts</div>
+                    <div class="contact-details-text">
+                        <div class="contact-item">
+                            <i class="fas fa-user-tie"></i>
+                            <div>
+                                <p class="contact-name">时尽书牧师 (Pastor Jason Shi)</p>
+                                <p class="contact-name">Pastor Nate Carroll</p>
                             </div>
                         </div>
-                        <div class="contact-item" data-ai-src-id="app/templates/pages/contact.html::16">
-                            <i class="fas fa-phone" data-ai-src-id="app/templates/pages/contact.html::17"></i>
-                            <p data-ai-src-id="app/templates/pages/contact.html::18">769-300-1456</p>
+                        <div class="contact-item">
+                            <i class="fas fa-phone"></i>
+                            <p>769-300-1456</p>
                         </div>
-                        <div class="contact-item" data-ai-src-id="app/templates/pages/contact.html::19">
-                            <i class="fas fa-envelope" data-ai-src-id="app/templates/pages/contact.html::20"></i>
-                            <p data-ai-src-id="app/templates/pages/contact.html::21">cccgj2009@gmail.com</p>
+                        <div class="contact-item">
+                            <i class="fas fa-envelope"></i>
+                            <p>cccgj2009@gmail.com</p>
                         </div>
                     </div>
 
-                    <a href="https://www.facebook.com/profile.php?id=61578114792082" target="_blank" class="btn-facebook" style="display: flex; align-items: center; gap: 10px; text-decoration: none; background: #1877f2; color: white; padding: 10px 20px; border-radius: 5px; margin-top: 20px;" data-ai-src-id="app/templates/pages/contact.html::22">
-                        <i class="fab fa-facebook-f" data-ai-src-id="app/templates/pages/contact.html::23"></i> Follow us on Facebook
+                    <a href="https://www.facebook.com/profile.php?id=61578114792082" target="_blank" class="btn-facebook" style="display: flex; align-items: center; gap: 10px; text-decoration: none; background: #1877f2; color: white; padding: 10px 20px; border-radius: 5px; margin-top: 20px;">
+                        <i class="fab fa-facebook-f"></i> Follow us on Facebook
                     </a>
 
-                    <div class="contact-details-text" style="margin-top: 40px;" data-ai-src-id="app/templates/pages/contact.html::24">
-                        <div class="contact-item" data-ai-src-id="app/templates/pages/contact.html::25">
-                            <i class="fas fa-map-marker-alt" data-ai-src-id="app/templates/pages/contact.html::26"></i>
-                            <p data-ai-src-id="app/templates/pages/contact.html::27">Address 地址 :<br>
+                    <div class="contact-details-text" style="margin-top: 40px;">
+                        <div class="contact-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <p>Address 地址 :<br>
                             803 Old Agency Road, Ridgeland, MS 39157</p>
                         </div>
                     </div>
 
                     <!-- Google Map Embedded -->
-                    <div class="map-container" style="margin-top: 20px;" data-ai-src-id="app/templates/pages/contact.html::28">
+                    <div class="map-container" style="margin-top: 20px;">
                         <iframe 
                             src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3367.877996230766!2d-90.18677592373197!3d32.42242600202173!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8629cdb5a25ebd75%3A0x244a1aa516724e40!2sChinese%20Christian%20Church%20of%20Greater%20Jackson!5e0!3m2!1sen!2sus!4v1765582173120!5m2!1sen!2sus"
                             width="100%" 
@@ -65,38 +65,38 @@
                             style="border:0;" 
                             allowfullscreen="" 
                             loading="lazy" 
-                            referrerpolicy="no-referrer-when-downgrade" data-ai-src-id="app/templates/pages/contact.html::29">
+                            referrerpolicy="no-referrer-when-downgrade">
                         </iframe>
                     </div>
                 </div>
 
                 <!-- Right Column: Contact Form -->
-                <div class="contact-form-section" data-ai-src-id="app/templates/pages/contact.html::30">
-                    <form action="{{ url_for('main.contact') }}" method="POST" id="contactForm" data-ai-src-id="app/templates/pages/contact.html::31">
-                        <div class="form-group-new" style="margin-bottom: 1.5rem;" data-ai-src-id="app/templates/pages/contact.html::32">
-                            <label class="form-label-new" style="display: block; margin-bottom: 0.5rem;" data-ai-src-id="app/templates/pages/contact.html::33">Name 姓名</label>
-                            <input type="text" id="name" name="name" class="form-control-new" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 5px;" required data-ai-src-id="app/templates/pages/contact.html::34">
+                <div class="contact-form-section">
+                    <form action="{{ url_for('main.contact') }}" method="POST" id="contactForm">
+                        <div class="form-group-new" style="margin-bottom: 1.5rem;">
+                            <label class="form-label-new" style="display: block; margin-bottom: 0.5rem;">Name 姓名</label>
+                            <input type="text" id="name" name="name" class="form-control-new" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 5px;" required>
                         </div>
-                        <div class="form-group-new" style="margin-bottom: 1.5rem;" data-ai-src-id="app/templates/pages/contact.html::35">
-                            <label class="form-label-new" style="display: block; margin-bottom: 0.5rem;" data-ai-src-id="app/templates/pages/contact.html::36">Email 电子邮件</label>
-                            <input type="email" id="email" name="email" class="form-control-new" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 5px;" required data-ai-src-id="app/templates/pages/contact.html::37">
+                        <div class="form-group-new" style="margin-bottom: 1.5rem;">
+                            <label class="form-label-new" style="display: block; margin-bottom: 0.5rem;">Email 电子邮件</label>
+                            <input type="email" id="email" name="email" class="form-control-new" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 5px;" required>
                         </div>
-                        <div class="form-group-new" style="margin-bottom: 1.5rem;" data-ai-src-id="app/templates/pages/contact.html::38">
-                            <label class="form-label-new" style="display: block; margin-bottom: 0.5rem;" data-ai-src-id="app/templates/pages/contact.html::39">Phone 电话</label>
-                            <input type="tel" id="phone" name="phone" class="form-control-new" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 5px;" data-ai-src-id="app/templates/pages/contact.html::40">
+                        <div class="form-group-new" style="margin-bottom: 1.5rem;">
+                            <label class="form-label-new" style="display: block; margin-bottom: 0.5rem;">Phone 电话</label>
+                            <input type="tel" id="phone" name="phone" class="form-control-new" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 5px;">
                         </div>
-                        <div class="form-group-new" style="margin-bottom: 1.5rem;" data-ai-src-id="app/templates/pages/contact.html::41">
-                            <label class="form-label-new" style="display: block; margin-bottom: 0.5rem;" data-ai-src-id="app/templates/pages/contact.html::42">Message 留言</label>
-                            <textarea id="message" name="message" class="form-control-new" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 5px; min-height: 150px;" required data-ai-src-id="app/templates/pages/contact.html::43"></textarea>
+                        <div class="form-group-new" style="margin-bottom: 1.5rem;">
+                            <label class="form-label-new" style="display: block; margin-bottom: 0.5rem;">Message 留言</label>
+                            <textarea id="message" name="message" class="form-control-new" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 5px; min-height: 150px;" required></textarea>
                         </div>
-                        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 1rem; background: #2c3e50; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;" data-ai-src-id="app/templates/pages/contact.html::44">Submit 提交</button>
+                        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 1rem; background: #2c3e50; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">Submit 提交</button>
                     </form>
                 </div>
             </div>
         </div>
     </section>
 
-    <button id="back-to-top-btn" title="Go to top" aria-label="Back to top" data-ai-src-id="app/templates/pages/contact.html::45"><i class="fa-solid fa-angle-up" data-ai-src-id="app/templates/pages/contact.html::46"></i></button>
+    <button id="back-to-top-btn" title="Go to top" aria-label="Back to top"><i class="fa-solid fa-angle-up"></i></button>
 {% endblock %}
 
 
