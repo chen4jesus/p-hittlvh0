@@ -1,0 +1,36 @@
+{% extends 'layouts/main.html' %}
+
+{% block title %}{{ title }} - Flask App{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+{% endblock %}
+
+{% block page_content %}
+<div class="dashboard">
+    <aside class="sidebar">
+        <nav class="sidebar-nav">
+            <a href="#" class="sidebar-link active">Overview</a>
+            <a href="#" class="sidebar-link">Analytics</a>
+            <a href="#" class="sidebar-link">Settings</a>
+        </nav>
+    </aside>
+    <div class="dashboard-content">
+        <h1>Dashboard</h1>
+        <div class="dashboard-grid">
+            <div class="stat-card">
+                <h3>Total Users</h3>
+                <p class="stat-number">1,234</p>
+            </div>
+            <div class="stat-card">
+                <h3>Active Sessions</h3>
+                <p class="stat-number">56</p>
+            </div>
+            <div class="stat-card">
+                <h3>Revenue</h3>
+                <p class="stat-number">$12,345</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
