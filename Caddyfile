@@ -1,6 +1,6 @@
 {
     # Global options
-    email {$ACME_EMAIL}
+    email {$ACME_EMAIL:faithconnect2020@gmail.com}
 }
 
 {$DOMAIN_NAME:localhost} {
