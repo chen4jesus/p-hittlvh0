@@ -2,11 +2,11 @@ version: '3.8'
 
 services:
   web:
+    container_name: app_container
     build: .
     ports:
       - "80:80"
       - "443:443"
-      - "8000:8000"
     environment:
       - FLASK_APP=wsgi.py
       - FLASK_DEBUG=false
@@ -15,11 +15,12 @@ services:
       - DOMAIN_NAME=${DOMAIN_NAME:-localhost}
       - ACME_EMAIL=${ACME_EMAIL:-admin@example.com}
     volumes:
-      - ./instance:/app/instance
+      - app_db:/app/instance
       - caddy_data:/data
       - caddy_config:/config
     restart: unless-stopped
 
 volumes:
+  app_db:
   caddy_data:
   caddy_config:

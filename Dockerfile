@@ -17,7 +17,7 @@ COPY Caddyfile /etc/caddy/Caddyfile
 RUN chmod +x start.sh
 
 # Expose ports
-EXPOSE 80 443 8000
+EXPOSE 80 443
 
 # Start both services
 CMD ["./start.sh"]
