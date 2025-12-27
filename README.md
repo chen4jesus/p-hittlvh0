@@ -1,4 +1,4 @@
-# CCC Gen Jong Flask Web Application
+# CCCGJ Flask Web Application
 
 A modern Flask web application following best practices.
 
